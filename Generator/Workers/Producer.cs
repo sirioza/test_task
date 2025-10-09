@@ -50,6 +50,9 @@ public class Producer(Channel<(byte[] buffer, int count)> channel, IOptions<Opti
                 buf[offset++] = (byte)'\n';
             }
 
+            //Ideally, when the limit is reached
+            //so that the producer does not try to write to an overflowing channel
+            //add cancellation through CancellationToken
             if (offset > 0)
             {
                 await _channel.Writer.WriteAsync((buf, offset));
