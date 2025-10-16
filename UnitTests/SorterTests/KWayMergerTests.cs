@@ -35,16 +35,18 @@ public class KWayMergerTests
         // Arrange
         KWayMerger merger = new(CreateOptions(bufferSize: 128));
 
-        var blocks = new LineEntry[][]
+        var blocks = new Memory<LineEntry>[]
         {
-            [
-                new LineEntry(1, "test1", "1.test1"),
-                new LineEntry(4, "test4", "4.test4")
-            ],
-            [
-                new LineEntry(2, "test2", "2.test2"),
-                new LineEntry(3, "test3", "3.test3")
-            ]
+            new LineEntry[]
+            {
+                new (1, "test1", "1.test1"),
+                new (4, "test4", "4.test4")
+            }.AsMemory(),
+            new LineEntry[]
+            {
+                new (2, "test2", "2.test2"),
+                new (3, "test3", "3.test3")
+            }.AsMemory()
         };
 
         string outputPath = Path.GetTempFileName();
@@ -65,9 +67,13 @@ public class KWayMergerTests
         // Arrange
         KWayMerger merger = new(CreateOptions());
 
-        var blocks = new LineEntry[][]
+        var blocks = new Memory<LineEntry>[]
         {
-            [], [new LineEntry(1, "test", "1.test")]
+            Array.Empty<LineEntry>().AsMemory(),
+            new LineEntry[]
+            {
+                new (1, "test", "1.test")
+            }.AsMemory()
         };
 
         string outputPath = Path.GetTempFileName();
@@ -89,7 +95,11 @@ public class KWayMergerTests
         // Arrange
         KWayMerger merger = new(CreateOptions());
 
-        var blocks = new LineEntry[][] { [], [] };
+        var blocks = new Memory<LineEntry>[]
+        {
+            Array.Empty<LineEntry>().AsMemory(),
+            Array.Empty<LineEntry>().AsMemory(),
+        };
 
         string outputPath = Path.GetTempFileName();
 
@@ -109,15 +119,17 @@ public class KWayMergerTests
         // Arrange
         KWayMerger merger = new(CreateOptions());
 
-        var blocks = new LineEntry[][]
+        var blocks = new Memory<LineEntry>[]
         {
-            [
-                new LineEntry(1, "test", "1.test1"),
-                new LineEntry(3, "test", "3.test3")
-            ],
-            [
-                new LineEntry(2, "test", "2.test2")
-            ]
+            new LineEntry[]
+            {
+                new (1, "test", "1.test1"),
+                new (3, "test", "3.test3")
+            }.AsMemory(),
+            new LineEntry[]
+            {
+                new (2, "test", "2.test2")
+            }.AsMemory()
         };
 
         string outputPath = Path.GetTempFileName();
