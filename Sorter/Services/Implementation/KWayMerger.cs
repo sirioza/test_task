@@ -10,16 +10,17 @@ public class KWayMerger(IOptions<Options> options) : IMerger
 {
     private readonly int _bufferSize = options.Value.BufferSize.NotZero(nameof(options.Value.BufferSize));
 
-    public void Merge(LineEntry[][] blocks, string outputPath)
+    public void Merge(Memory<LineEntry>[] blocks, string outputPath)
     {
         PriorityQueue<(LineEntry entry, int blockIdx, int idxInBlock), (string, long)> priorityQueue =
             new(Comparer<(string, long)>.Create(CompareHelper.CompareLines));
 
         for (int i = 0; i < blocks.Length; i++)
         {
-            if (blocks[i].Length > 0)
+            Span<LineEntry> block = blocks[i].Span;
+            if (!block.IsEmpty)
             {
-                priorityQueue.Enqueue((blocks[i][0], i, 0), (blocks[i][0].Text, blocks[i][0].Number));
+                priorityQueue.Enqueue((block[0], i, 0), (block[0].Text, block[0].Number));
             }
         }
 
@@ -31,9 +32,10 @@ public class KWayMerger(IOptions<Options> options) : IMerger
             fileWriter.WriteLine(entry.Original);
 
             idxInBlock++;
-            if (idxInBlock < blocks[blockIdx].Length)
+            Span<LineEntry> block = blocks[blockIdx].Span;
+            if (idxInBlock < block.Length)
             {
-                LineEntry next = blocks[blockIdx][idxInBlock];
+                LineEntry next = block[idxInBlock];
                 priorityQueue.Enqueue((next, blockIdx, idxInBlock), (next.Text, next.Number));
             }
         }
