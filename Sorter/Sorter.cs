@@ -127,18 +127,16 @@ public class Sorter(IMerger merger, IOptions<Options> options)
 
         // divide into blocks
         int chunkSize = totalLines / threadCount;
-        var blocks = new LineEntry[threadCount][];
+        var blocks = new Memory<LineEntry>[threadCount];
         for (int i = 0; i < threadCount; i++)
         {
             int start = i * chunkSize;
             int end = i == threadCount - 1 ? totalLines : start + chunkSize;
-            int len = end - start;
-            blocks[i] = new LineEntry[len];
-            Array.Copy(parsedLines, start, blocks[i], 0, len);
+            blocks[i] = parsedLines.AsMemory(start, end - start);
         }
 
         // sort each block in parallel
-        Parallel.For(0, threadCount, blockIdx => { Array.Sort(blocks[blockIdx], CompareHelper.CompareLines); });
+        Parallel.For(0, threadCount, blockIdx => Array.Sort(blocks[blockIdx].Span.ToArray(), CompareHelper.CompareLines));
 
         // merge
         chunkPath = Path.Combine(_tempDir, $"chunk_{chunkCounter++}.txt");
