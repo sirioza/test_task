@@ -88,12 +88,12 @@ public class SorterTests
 
         var merger = Substitute.For<IMerger>();
         merger
-            .When(m => m.Merge(Arg.Any<LineEntry[][]>(), Arg.Any<string>()))
+            .When(m => m.Merge(Arg.Any<Memory<LineEntry>[]>(), Arg.Any<string>()))
             .Do(callInfo =>
             {
-                var blocks = callInfo.Arg<LineEntry[][]>();
+                var blocks = callInfo.Arg<Memory<LineEntry>[]>();
                 var path = callInfo.Arg<string>();
-                File.WriteAllLines(path, blocks.SelectMany(b => b.Select(x => x.Original)));
+                File.WriteAllLines(path, blocks.SelectMany(b => b.Span.ToArray()).Select(x => x.Original));
             });
 
         Sorter sorter = new(merger, CreateOptions(option.Value.InputPath, option.Value.OutputPath, tempDir, 2));
